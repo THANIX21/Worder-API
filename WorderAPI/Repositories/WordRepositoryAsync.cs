@@ -1,5 +1,6 @@
 ﻿using Npgsql;
-using WorderAPI.Classes;
+using WorderAPI.Classes.Base;
+using WorderAPI.Classes.Interfaces;
 using WorderAPI.Interfaces;
 
 namespace WorderAPI.Repositories
@@ -12,6 +13,27 @@ namespace WorderAPI.Repositories
             _connectionString = configuration.GetConnectionString("WORD_DB");
         }
 
+        public async Task<int> CreateWord(IWord word)
+        {
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            string sql = @"INSERT INTO public.""Word"" (""term"", ""dt_created"", ""dt_altered"", ""type"") 
+                   VALUES (@Term, @DTCreated, @DTAltered, @Type) 
+                   RETURNING ""id""";
+
+            await using var cmd = new NpgsqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue("@Term", word.Term);
+            cmd.Parameters.AddWithValue("@DTCreated", word.DTCreated);
+            cmd.Parameters.AddWithValue("@DTAltered", word.DTAltered);
+            cmd.Parameters.AddWithValue("@Type", word.Type);
+
+            var result = await cmd.ExecuteScalarAsync();
+
+            return Convert.ToInt32(result);
+        }
+
         public async Task<List<WordType>> GetWordTypes()
         {
             var wordTypes = new List<WordType>();
@@ -19,7 +41,7 @@ namespace WorderAPI.Repositories
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
-            await using var cmd = new NpgsqlCommand("CALL GetWordTypes()", conn);
+            await using var cmd = new NpgsqlCommand("SELECT * FROM public.\"WordType\" ORDER BY ID ASC", conn);
             await using var reader = await cmd.ExecuteReaderAsync();
 
             while (await reader.ReadAsync())
@@ -33,7 +55,5 @@ namespace WorderAPI.Repositories
 
             return wordTypes;
         }
-
-
     }
 }
