@@ -1,8 +1,21 @@
+using System;
 using WorderAPI.Repositories;
-using WorderAPI.Interfaces;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton(provider =>
+{
+    try
+    {
+        return TimeZoneInfo.FindSystemTimeZoneById("South Africa Standard Time"); // Windows
+    }
+    catch (TimeZoneNotFoundException)
+    {
+        return TimeZoneInfo.FindSystemTimeZoneById("Africa/Johannesburg"); // Linux/Docker
+    }
+});
+
 var connectionString = builder.Configuration.GetConnectionString("WORD_DB");
 
 builder.Services.AddControllers();
@@ -10,11 +23,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<IWordRepositoryAsync, WordRepositoryAsync>();
 
 var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
-
-}
 
 app.UseHttpsRedirection();
 

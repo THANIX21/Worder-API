@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WorderAPI.Classes.Base;
-using WorderAPI.Classes.Interfaces;
-using WorderAPI.Interfaces;
 using WorderAPI.Repositories;
 
 namespace WorderAPI.Controllers
@@ -23,18 +21,53 @@ namespace WorderAPI.Controllers
         //    return await _wordRepositoryAsync.GetWordTypes();
         //}
 
-        [HttpGet]
-        [Route("getwordtypes")]
-        public async Task<List<WordType>> GetWordTypes()
+        // GET api/words/types
+        [HttpGet("types")]
+        public async Task<ActionResult<List<WordType>>> GetWordTypes()
         {
-            return await _wordRepositoryAsync.GetWordTypes();
+            var wordTypes = await _wordRepositoryAsync.GetWordTypes();
+            if (wordTypes == null || wordTypes.Count == 0)
+                return NotFound("No word types found.");
+            return Ok(wordTypes);
         }
-
-        [HttpPost]
-        [Route("createword")]
-        public async Task<int> CreateWord([FromBody] Word word)
+        // GET api/words
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Word>> GetWord(int id)
         {
-            return await _wordRepositoryAsync.CreateWord(word);
+            var word = await _wordRepositoryAsync.GetWord(id);
+            if (word == null)
+                return NotFound();
+            return word;
+        }
+        // POST api/words
+        [HttpPost]
+        public async Task<ActionResult<Word>> CreateWord([FromBody] Word word)
+        {
+            var createdWord = await _wordRepositoryAsync.CreateWord(word);
+
+            return CreatedAtAction(
+                nameof(GetWord),
+                new { id = createdWord.ID },
+                createdWord
+            );
+        }
+        // PATCH api/words/{id}
+        [HttpPatch("{id}")]
+        public async Task<ActionResult> EditWord(int id, [FromBody] Word word)
+        {
+            var affectedRows = await _wordRepositoryAsync.EditWord(word);
+            if (affectedRows <= 0)
+                return NotFound($"Word with id {word.ID} not found.");
+            return NoContent();
+        }
+        // DELETE api/words/{id}
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteWord(int id)
+        {
+            var affectedRows = await _wordRepositoryAsync.DeleteWord(id);
+            if (affectedRows <= 0)
+                return NotFound($"Word with id {id} not found.");
+            return NoContent();
         }
     }
 }
