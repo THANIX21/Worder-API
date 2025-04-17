@@ -19,6 +19,7 @@ builder.Services.AddSingleton(provider =>
 var connectionString = builder.Configuration.GetConnectionString("WORD_DB");
 
 builder.Services.AddControllers();
+builder.Services.AddCors();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<IWordRepositoryAsync, WordRepositoryAsync>();
 
@@ -29,5 +30,9 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors(options => options.AllowAnyOrigin()
+                              .AllowAnyHeader()
+                              .AllowAnyMethod());
 
 app.Run();
