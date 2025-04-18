@@ -5,6 +5,7 @@ namespace WorderAPI.Repositories
 {
     public interface IWordRepositoryAsync 
     {
+        Task<List<Word>> GetAllWords();
         Task<Word> GetWord(int id);
         Task<Word> CreateWord(IWord word);
         Task<int> EditWord(IWord word);

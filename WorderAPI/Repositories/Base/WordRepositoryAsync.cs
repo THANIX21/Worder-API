@@ -16,6 +16,35 @@ namespace WorderAPI.Repositories
             _timeZone = timeZone;
         }
 
+        public async Task<List<Word>> GetAllWords()
+        {
+            List<Word> words = new List<Word>();
+
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            string sql = @"
+                    SELECT * FROM public.""Word""";
+
+            await using var cmd = new NpgsqlCommand(sql, conn);
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+
+            while(await reader.ReadAsync())
+            {
+                words.Add(new Word
+                {
+                    ID = reader.GetInt32(0),
+                    Term = reader.GetString(1),
+                    DTCreated = reader.GetDateTime(2),
+                    DTAltered = reader.GetDateTime(3),
+                    Type = reader.GetInt32(4)
+                });
+            }
+
+            return words;
+        }
+
         public async Task<Word> GetWord(int id)
         {
             Word word = null;

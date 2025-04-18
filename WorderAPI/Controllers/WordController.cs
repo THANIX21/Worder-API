@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WorderAPI.Classes.Base;
+using WorderAPI.Classes.Interfaces;
 using WorderAPI.Repositories;
 
 namespace WorderAPI.Controllers
@@ -14,13 +15,6 @@ namespace WorderAPI.Controllers
         {
             _wordRepositoryAsync = wordRepositoryAsync;
         }
-
-        //[Route("getwords")]
-        //public async Task<List<Word>> GetAllWords()
-        //{
-        //    return await _wordRepositoryAsync.GetWordTypes();
-        //}
-
         // GET api/words/types
         [HttpGet("types")]
         public async Task<ActionResult<List<WordType>>> GetWordTypes()
@@ -30,7 +24,16 @@ namespace WorderAPI.Controllers
                 return NotFound("No word types found.");
             return Ok(wordTypes);
         }
-        // GET api/words
+        // GET api/words/all
+        [HttpGet("all")]
+        public async Task<ActionResult<List<Word>>> GetAllWords()
+        {
+            var words = await _wordRepositoryAsync.GetAllWords();
+            if(words == null || words.Count() == 0)
+                return NotFound("No words found.");
+            return Ok(words);
+        }
+        // GET api/words/id
         [HttpGet("{id}")]
         public async Task<ActionResult<Word>> GetWord(int id)
         {

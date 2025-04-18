@@ -1,6 +1,6 @@
-using System;
 using WorderAPI.Repositories;
-
+using WorderAPI.Repositories.Base;
+using WorderAPI.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +22,7 @@ builder.Services.AddControllers();
 builder.Services.AddCors();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<IWordRepositoryAsync, WordRepositoryAsync>();
+builder.Services.AddScoped<ISentenceRepositoryAsync, SentenceRepositoryAsync>();
 
 var app = builder.Build();
 
